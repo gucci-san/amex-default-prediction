@@ -9,7 +9,11 @@
     * 特にto_feather, to_pickleのとき
         * こだわりないなら巨大なcsvは一旦pickleで持ち直したほうが試行錯誤が捗りそう
         * そのときに無害なfloat64を消しとくほうが良いと思う --
-* Canceled future executionは大体メモリkilled
+            * と思ったら「pickleは全展開でメモリめっちゃ食う」という記述あり。featherの実行停止の原因はまた別か？
+                * 今やったら動いたわ。謎は深まった
+    * 結論は「csv読むときはdask + 中間ファイルはfeather」で一旦いいと思う
+    * Canceled future executionは大体メモリkilled
+        * gnome-system-monitorで見ながら実行するとわかる
 
 ### 【EDA】
 #### notebook(1)
