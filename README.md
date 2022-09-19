@@ -5,7 +5,10 @@
 ### 気づき
 * !! 環境またぐなら絶対constantsだけファイル分けといたほうが楽
     * jsonより普通に.pyでimportしたほうが楽じゃね？
-* 
+* featherでメモリkillされるケースで、pickleだと通る場合がある
+    * 特にto_feather, to_pickleのとき
+        * こだわりないなら巨大なcsvは一旦pickleで持ち直したほうが試行錯誤が捗りそう
+        * そのときに無害なfloat64を消しとくほうが良いと思う --
 
 ### 【EDA】
 #### notebook(1)
