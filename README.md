@@ -9,6 +9,7 @@
     * 特にto_feather, to_pickleのとき
         * こだわりないなら巨大なcsvは一旦pickleで持ち直したほうが試行錯誤が捗りそう
         * そのときに無害なfloat64を消しとくほうが良いと思う --
+* Canceled future executionは大体メモリkilled
 
 ### 【EDA】
 #### notebook(1)
