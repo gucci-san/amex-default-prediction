@@ -1,1 +1,5 @@
 *.csv
+*.pkl
+*.feather
+
+DRAFTS_*
