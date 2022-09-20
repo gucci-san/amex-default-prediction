@@ -6,6 +6,7 @@ b_ = Fore.BLUE
 g_ = Fore.GREEN
 sr_ = Fore.RESET
 
+import time
 import os,random
 import datetime
 from contextlib import contextmanager
