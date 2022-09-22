@@ -14,6 +14,15 @@
     * 結論は「csv読むときはdask + 中間ファイルはfeather」で一旦いいと思う
     * Canceled future executionは大体メモリkilled
         * gnome-system-monitorで見ながら実行するとわかる
+* 128GBでもfeaturizationはkillされた
+    * スクリプト化してコマンドラインからパターンを呼ぶようにしたらよい気がする
+
+### 手法
+* daishu(1st)
+    * カテゴリ、カテゴリonehot, num, num-rankの基本統計量
+    * + LGBのoof
+
+
 
 ### 【EDA】
 #### notebook(1)
