@@ -194,6 +194,12 @@ def Lgb_train_and_predict(train, test, config, gkf=False, aug=None, output_root=
                 val_uids = tmp.loc[val_index, id_name].values
                 new_split.append((train.loc[train[id_name].isin(trn_uids)].index, train.loc[train[id_name].isin(val_uids)].index))
             split = new_split
+
+            # !! 完全に理解した
+            # ↑手動でgkf(=Group KFold)を実装してる --
+            # drop_duplicatesしたあとsklearn.gkfじゃあかんのか？という気はするが...
+
+
             # GroupKFoldも検討してたっぽい(GroupKFoldってなんだ？) --
             # => 同じfold内に同じcustomerが入ってほしくない、みたいなときに使う
             # => 今回はdrop_duplicatesで1cid - 1recordが保証されるのでMECE
