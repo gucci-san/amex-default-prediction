@@ -39,8 +39,12 @@ def reduce_mem_usage(df):
     for col in df.columns:
         col_type = df[col].dtype
         #print(f"{y_}col:{col}...type:{col_type}{sr_}")
+        
+        # 一度reduce_mem_usageを通ったdfは通れなくなってる --
+        if isinstance(col_type, pd.CategoricalDtype):
+            continue
 
-        if col_type != object:
+        elif col_type != object:
             c_min = df[col].min()
             c_max = df[col].max()
             #print(f"{b_}    ......c_min:{c_min} // c_max:{c_max}{sr_}")
