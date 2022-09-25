@@ -7,10 +7,12 @@ g_ = Fore.GREEN
 sr_ = Fore.RESET
 
 import time
-import os,random
+import gc, os, random
 import datetime
 from contextlib import contextmanager
 from tqdm import tqdm
+from colorama import Fore;
+y_ = Fore.YELLOW; b_ = Fore.BLUE; g_ = Fore.GREEN; sr_ = Fore.RESET
 
 from sklearn.metrics import roc_auc_score,mean_squared_error,average_precision_score,log_loss
 from sklearn.model_selection import KFold, StratifiedKFold,GroupKFold
@@ -36,7 +38,7 @@ def reduce_mem_usage(df):
     start_mem = df.memory_usage().sum() / 1024**2
     #print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
 
-    for col in df.columns:
+    for col in tqdm(df.columns):
         col_type = df[col].dtype
         #print(f"{y_}col:{col}...type:{col_type}{sr_}")
         
@@ -153,7 +155,8 @@ def Write_log(logFile,text,isPrint=True):
     return None
 
 
-def Lgb_train_and_predict(train, test, config, gkf=False, aug=None, output_root='./output/', run_id=None):
+def Lgb_train_and_predict(train, test, config, gkf=False, test_batch_id=None, aug=None, output_root='./output/', run_id=None):
+    # define run_id & make output dir --
     if not run_id:
         run_id = 'run_lgb_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         while os.path.exists(output_root+run_id+'/'):
@@ -164,11 +167,16 @@ def Lgb_train_and_predict(train, test, config, gkf=False, aug=None, output_root=
         output_path = output_root + run_id + '/'
     if not os.path.exists(output_path):
         os.mkdir(output_path)
+    print(f"{y_} Lgb_train_and_predict : {run_id}{sr_}")    
+
+
     os.system(f'cp ./*.py {output_path}')
     os.system(f'cp ./*.sh {output_path}')
     config['lgb_params']['seed'] = config['seed']
+    
     oof, sub = None,None
     if train is not None:
+        print(f"{g_}     ... start train{sr_}")
         log = open(output_path + '/train.log','w',buffering=1)
         log.write(str(config)+'\n')
         features = config['feature_name']
@@ -192,13 +200,16 @@ def Lgb_train_and_predict(train, test, config, gkf=False, aug=None, output_root=
                 val_uids = tmp.loc[val_index,id_name].values
                 new_split.append((train.loc[train[id_name].isin(trn_uids)].index,train.loc[train[id_name].isin(val_uids)].index))
             split = new_split
-
+            del tmp, trn_uids, val_uids; gc.collect()
             # skf = GroupKFold(n_splits=folds)
             # split = skf.split(train,train[label_name],train[id_name])
         else:
             skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
             split = skf.split(train,train[label_name])
+        
+        print(f"{g_}     ... folds defined{sr_}")
         for fold, (trn_index, val_index) in enumerate(split):
+            print(f"{b_}        ... fold : {fold}{sr_}")
             evals_result_dic = {}
             train_cids = train.loc[trn_index,id_name].values
             if aug:
@@ -252,15 +263,28 @@ def Lgb_train_and_predict(train, test, config, gkf=False, aug=None, output_root=
             log_df.to_csv(output_root + '/experiment_log.csv',index=False,header=None,mode='a')
 
     if test is not None:
+        if train is None:
+            folds = config['folds']
+            seed = config['seed']
+            features = config['feature_name']
+            mean_valid_metric, global_valid_metric = None, None
+
         sub = test[[id_name]]
         sub['prediction'] = 0
-        for fold in range(folds):
+        for fold in tqdm(range(folds)):
             model = lgb.Booster(model_file=output_path + '/fold%s.ckpt'%fold)
             test_preds = model.predict(test[features], num_iteration=model.best_iteration)
             sub['prediction'] += (test_preds / folds)
-        sub[[id_name,'prediction']].to_csv(output_path + '/submission.csv.zip', compression='zip',index=False)
+        if test_batch_id is None:
+            sub[[id_name,'prediction']].to_csv(output_path + f'/submission.csv.zip', compression='zip',index=False)
+        else:
+            if not os.path.exists(output_path + "/test_batch"):
+                os.mkdir(output_path + "/test_batch")
+            sub[[id_name,'prediction']].reset_index(drop=False, names="index").to_feather(output_path + f"/test_batch/submission_batch{test_batch_id}.feather")
+    
     if args.save_dir in output_path:
         os.rename(output_path,output_root+run_id+'/')
+    
     return oof,sub,(mean_valid_metric,global_valid_metric)
 
 class TaskDataset:
