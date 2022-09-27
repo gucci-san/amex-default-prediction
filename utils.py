@@ -22,6 +22,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset,TensorDataset, DataLoader,RandomSampler
+from torch.optim import AdamW
 
 import torch.cuda.amp as amp
 
@@ -90,7 +91,8 @@ parser.add_argument("--root", type=str, default='./input/')
 parser.add_argument("--save_dir", type=str, default='tmp')
 parser.add_argument("--use_apm", action='store_true', default=False)
 parser.add_argument("--num_workers", type=int, default=16)
-parser.add_argument("--do_train", action='store_true', default=False)
+#parser.add_argument("--do_train", action='store_true', default=False)
+parser.add_argument("--do_train", action='store_true', default=True)
 parser.add_argument("--test", action='store_true', default=False)
 parser.add_argument("--seed", type=int, default=42)
 parser.add_argument("--remark", type=str, default='')
