@@ -18,10 +18,21 @@
     * スクリプト化してコマンドラインからパターンを呼ぶようにしたらよい気がする
 
 ### 手法
-* daishu(1st)
+* daishu(1st) : LGBM + GRUのアンサンブル
     * カテゴリ、カテゴリonehot, num, num-rankの基本統計量
-    * + LGBのoof
+    * +LGBのoof
+    * GRU
+    * GreedyFindBinでGRU
 
+* Chris Deotte(14th) : LGBM + Transformerのアンサンブル
+    * LGBMはpublicのnotebook https://www.kaggle.com/code/ragnar123/amex-lgbm-dart-cv-0-7977
+    * Transformerは独自
+        * 普通だとskip connectionしてたけど、knowledge distllationしたらskip connectionいらなくなった
+        * GRU層も入れてる
+        * Soft Label(between 0 and 1, from LGBM) と Hard Label(0 or 1)への学習を交互に繰り返す。めっちゃテクい
+    * LGBMはNormal-KFold, 5 mean (+ "slight model variation")
+    * Hyperparameters tune には Nested-KFold (Double Cross Validationともいうらしい)
+    * RAPIDS使ったら全てがクソ早く終わるらしい
 
 
 ### 【EDA】
